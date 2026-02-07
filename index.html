@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okta Practical Exam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            min-height: 90vh;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        /* Page 1: Email Input */
+        .email-section {
+            max-width: 600px;
+            margin: 60px auto;
+            text-align: center;
+        }
+
+        .email-section .intro {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .email-section .intro ul {
+            margin: 20px 0 20px 30px;
+        }
+
+        .email-section .intro li {
+            margin-bottom: 10px;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Page 2: Credentials & Preparation */
+        .prep-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .credentials-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 35px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .credentials-panel h2 {
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .cred-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cred-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cred-value {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        .cred-link {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .instructions-panel {
+            background: #f8f9fa;
+            padding: 35px;
+            border-radius: 12px;
+        }
+
+        .instructions-panel h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .task-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .task-preview h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .task-preview p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .ready-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .ready-section p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .ready-section .btn {
+            font-size: 20px;
+            padding: 20px 60px;
+        }
+
+        /* Page 3: Exam */
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .timer {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .exam-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .tasks-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-column {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .task-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .task-card.completed {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .task-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .task-card h3 {
+            color: #333;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-number {
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .task-card.completed .task-number {
+            background: #4caf50;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .status-done {
+            background: #4caf50;
+            color: white;
+        }
+
+        .task-details {
+            color: #555;
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        .task-details ul {
+            margin: 10px 0 10px 25px;
+        }
+
+        .task-details li {
+            margin-bottom: 8px;
+        }
+
+        .task-details strong {
+            color: #333;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-wrapper:hover {
+            background: #f0f0f0;
+        }
+
+        .checkbox-wrapper input {
+            margin-right: 12px;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-wrapper label {
+            cursor: pointer;
+            font-size: 15px;
+            color: #333;
+        }
+
+        /* Sidebar */
+        .sidebar-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .progress-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .progress-item:last-child {
+            border-bottom: none;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-status {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .progress-status.done {
+            color: #4caf50;
+        }
+
+        .progress-status.pending {
+            color: #999;
+        }
+
+        .submit-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .submit-section p {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        /* Results */
+        .result-card {
+            background: #d4edda;
+            border: 3px solid #28a745;
+            padding: 40px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .result-card.fail {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .result-card h2 {
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .result-card .score {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .result-card p {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            color: #856404;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .alert-box strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PAGE 1: Email Input -->
+        <div id="page1" class="page active">
+            <h1>🎓 Okta Certified Professional</h1>
+            <p class="subtitle">Hands-On Practical Exam</p>
+
+            <div class="email-section">
+                <div class="intro">
+                    <p><strong>Welcome to the Okta Practical Exam!</strong></p>
+                    <p>This is a hands-on assessment where you'll configure real Okta admin console features.</p>
+                    
+                    <p><strong>What to expect:</strong></p>
+                    <ul>
+                        <li>✅ You'll receive temporary admin credentials</li>
+                        <li>⏱️ 30 minutes to complete 4 configuration tasks</li>
+                        <li>🔍 Automatic validation via Okta API</li>
+                        <li>🧹 Your account will be deleted after completion</li>
+                    </ul>
+
+                    <p><strong>Enter your email to begin:</strong></p>
+                </div>
+
+                <input 
+                    type="email" 
+                    class="email-input" 
+                    id="candidateEmail" 
+                    placeholder="your.email@example.com"
+                    required
+                >
+
+                <button class="btn btn-full" onclick="createAccount()">
+                    <span id="btnText">Create My Exam Account</span>
+                    <span id="btnSpinner" class="spinner hidden"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 2: Credentials & Preparation -->
+        <div id="page2" class="page">
+            <h1>🔑 Your Exam Credentials</h1>
+            <p class="subtitle">Review your access details and exam tasks before starting</p>
+
+            <div class="alert-box">
+                <strong>⚠️ Important:</strong>
+                Copy these credentials now! Open the Okta Admin Console in a NEW TAB and log in. Keep both tabs open during the exam.
+            </div>
+
+            <div class="prep-layout">
+                <!-- Left: Credentials -->
+                <div class="credentials-panel">
+                    <h2>🔐 Login Credentials</h2>
+                    
+                    <div class="cred-item">
+                        <div class="cred-label">Okta Console URL</div>
+                        <div class="cred-value">
+                            <a href="https://integrator-6652914.okta.com/admin" target="_blank" class="cred-link">
+                                integrator-6652914.okta.com
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="cred-item">
+                        <div class="cred-label">Username</div>
+                        <div class="cred-value" id="displayUsername">---</div>
+                    </div>
+
+                    <div class="cred-item">
+                        <div class="cred-label">Password</div>
+                        <div class="cred-value" id="displayPassword">---</div>
+                    </div>
+
+                    <div class="cred-item">
+                        <div class="cred-label">Your Email (for MFA)</div>
+                        <div class="cred-value" id="displayEmail" style="font-size: 16px;">---</div>
+                    </div>
+                </div>
+
+                <!-- Right: Task Overview -->
+                <div class="instructions-panel">
+                    <h2>📋 Exam Tasks Overview</h2>
+
+                    <div class="task-preview">
+                        <h4>Task 1: Create User Profile</h4>
+                        <p>Create user Ben Carter with specific profile attributes</p>
+                    </div>
+
+                    <div class="task-preview">
+                        <h4>Task 2: Configure Custom Attribute</h4>
+                        <p>Add custom "internId" attribute to user schema</p>
+                    </div>
+
+                    <div class="task-preview">
+                        <h4>Task 3: Assign Attribute Value</h4>
+                        <p>Set the internId value for Ben Carter</p>
+                    </div>
+
+                    <div class="task-preview">
+                        <h4>Task 4: Create Group</h4>
+                        <p>Create "Summer Interns" group in Okta</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ready-section">
+                <p><strong>Ready to start?</strong> The 30-minute timer will begin when you click below.</p>
+                <button class="btn" onclick="startExam()">
+                    🚀 Start Exam Now
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE 3: Exam -->
+        <div id="page3" class="page">
+            <div class="exam-header">
+                <div>
+                    <h1 style="text-align: left; margin: 0;">Okta Practical Exam</h1>
+                    <p style="color: #666; margin: 5px 0 0 0;">Complete all 4 tasks</p>
+                </div>
+                <div class="timer" id="timer">30:00</div>
+            </div>
+
+            <div class="exam-layout">
+                <!-- Main: Tasks -->
+                <div class="tasks-column">
+                    <!-- Task 1 -->
+                    <div class="task-card" id="task1">
+                        <div class="task-header-row">
+                            <h3>
+                                <span class="task-number">1</span>
+                                Create User Profile
+                            </h3>
+                            <span class="status-badge status-pending" id="status1">Pending</span>
+                        </div>
+                        <div class="task-details">
+                            <p><strong>Instructions:</strong> Create a new user in Okta Admin Console with these details:</p>
+                            <ul>
+                                <li><strong>Email/Login:</strong> ben.carter@oktacertified.com</li>
+                                <li><strong>First Name:</strong> Ben</li>
+                                <li><strong>Last Name:</strong> Carter</li>
+                                <li><strong>Department:</strong> Technology</li>
+                                <li><strong>Job Title:</strong> IT Intern</li>
+                            </ul>
+                            <p style="font-size: 13px; color: #888; margin-top: 10px;">
+                                📍 Navigate: Directory → People → Add Person
+                            </p>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="check1" onchange="updateTask(1)">
+                            <label for="check1">✅ I have completed this task in Okta Admin Console</label>
+                        </div>
+                    </div>
+
+                    <!-- Task 2 -->
+                    <div class="task-card" id="task2">
+                        <div class="task-header-row">
+                            <h3>
+                                <span class="task-number">2</span>
+                                Configure Custom Attribute
+                            </h3>
+                            <span class="status-badge status-pending" id="status2">Pending</span>
+                        </div>
+                        <div class="task-details">
+                            <p><strong>Instructions:</strong> Create a custom user profile attribute with these specifications:</p>
+                            <ul>
+                                <li><strong>Variable Name:</strong> internId</li>
+                                <li><strong>Display Name:</strong> Intern ID</li>
+                                <li><strong>Attribute Type:</strong> String</li>
+                                <li><strong>Read-only:</strong> Yes (Enabled)</li>
+                            </ul>
+                            <p style="font-size: 13px; color: #888; margin-top: 10px;">
+                                📍 Navigate: Directory → Profile Editor → User (default) → Add Attribute
+                            </p>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="check2" onchange="updateTask(2)">
+                            <label for="check2">✅ I have completed this task in Okta Admin Console</label>
+                        </div>
+                    </div>
+
+                    <!-- Task 3 -->
+                    <div class="task-card" id="task3">
+                        <div class="task-header-row">
+                            <h3>
+                                <span class="task-number">3</span>
+                                Assign Attribute Value
+                            </h3>
+                            <span class="status-badge status-pending" id="status3">Pending</span>
+                        </div>
+                        <div class="task-details">
+                            <p><strong>Instructions:</strong> For the user Ben Carter, populate the custom attribute:</p>
+                            <ul>
+                                <li><strong>Intern ID:</strong> INT-2024-07</li>
+                            </ul>
+                            <p style="font-size: 13px; color: #888; margin-top: 10px;">
+                                📍 Navigate: Directory → People → Ben Carter → Edit Profile → Set Intern ID value
+                            </p>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="check3" onchange="updateTask(3)">
+                            <label for="check3">✅ I have completed this task in Okta Admin Console</label>
+                        </div>
+                    </div>
+
+                    <!-- Task 4 -->
+                    <div class="task-card" id="task4">
+                        <div class="task-header-row">
+                            <h3>
+                                <span class="task-number">4</span>
+                                Create Group
+                            </h3>
+                            <span class="status-badge status-pending" id="status4">Pending</span>
+                        </div>
+                        <div class="task-details">
+                            <p><strong>Instructions:</strong> Create a new group in Okta with these details:</p>
+                            <ul>
+                                <li><strong>Group Name:</strong> Summer Interns</li>
+                            </ul>
+                            <p style="font-size: 13px; color: #888; margin-top: 10px;">
+                                📍 Navigate: Directory → Groups → Add Group
+                            </p>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="check4" onchange="updateTask(4)">
+                            <label for="check4">✅ I have completed this task in Okta Admin Console</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar: Progress & Submit -->
+                <div class="sidebar-column">
+                    <div class="sidebar-card">
+                        <h3>📊 Progress</h3>
+                        <div class="progress-item">
+                            <span class="progress-label">Task 1: User</span>
+                            <span class="progress-status pending" id="prog1">○</span>
+                        </div>
+                        <div class="progress-item">
+                            <span class="progress-label">Task 2: Attribute</span>
+                            <span class="progress-status pending" id="prog2">○</span>
+                        </div>
+                        <div class="progress-item">
+                            <span class="progress-label">Task 3: Value</span>
+                            <span class="progress-status pending" id="prog3">○</span>
+                        </div>
+                        <div class="progress-item">
+                            <span class="progress-label">Task 4: Group</span>
+                            <span class="progress-status pending" id="prog4">○</span>
+                        </div>
+                    </div>
+
+                    <div class="submit-section">
+                        <p><strong>⚠️ Complete all 4 tasks before submitting</strong></p>
+                        <button class="btn btn-full" id="submitBtn" onclick="submitExam()" disabled>
+                            Submit for Validation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="result-card hidden" id="resultCard"></div>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 30 * 60;
+        let timerInterval;
+        let userId = null;
+        let completedCount = 0;
+
+        async function createAccount() {
+            const email = document.getElementById('candidateEmail').value.trim();
+            
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            document.getElementById('btnText').classList.add('hidden');
+            document.getElementById('btnSpinner').classList.remove('hidden');
+            document.querySelector('.btn').disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/create-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidate_email: email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    userId = data.user_id;
+                    document.getElementById('displayUsername').textContent = data.username;
+                    document.getElementById('displayPassword').textContent = data.password;
+                    document.getElementById('displayEmail').textContent = email;
+
+                    document.getElementById('page1').classList.remove('active');
+                    document.getElementById('page2').classList.add('active');
+                } else {
+                    alert('Error: ' + (data.error || 'Could not create account'));
+                    document.getElementById('btnText').classList.remove('hidden');
+                    document.getElementById('btnSpinner').classList.add('hidden');
+                    document.querySelector('.btn').disabled = false;
+                }
+            } catch (error) {
+                alert('Connection error. Make sure backend is running.');
+                document.getElementById('btnText').classList.remove('hidden');
+                document.getElementById('btnSpinner').classList.add('hidden');
+                document.querySelector('.btn').disabled = false;
+            }
+        }
+
+        function startExam() {
+            document.getElementById('page2').classList.remove('active');
+            document.getElementById('page3').classList.add('active');
+            startTimer();
+        }
+
+        function startTimer() {
+            updateTimer();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Auto-submitting...');
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function updateTask(taskNum) {
+            const checked = document.getElementById(`check${taskNum}`).checked;
+            const card = document.getElementById(`task${taskNum}`);
+            const status = document.getElementById(`status${taskNum}`);
+            const prog = document.getElementById(`prog${taskNum}`);
+
+            if (checked) {
+                card.classList.add('completed');
+                status.className = 'status-badge status-done';
+                status.textContent = 'Done';
+                prog.className = 'progress-status done';
+                prog.textContent = '✓';
+                completedCount++;
+            } else {
+                card.classList.remove('completed');
+                status.className = 'status-badge status-pending';
+                status.textContent = 'Pending';
+                prog.className = 'progress-status pending';
+                prog.textContent = '○';
+                completedCount--;
+            }
+
+            document.getElementById('submitBtn').disabled = completedCount !== 4;
+        }
+
+        async function submitExam() {
+            clearInterval(timerInterval);
+            
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Validating...';
+
+            try {
+                const response = await fetch('http://localhost:5000/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+
+                const resultCard = document.getElementById('resultCard');
+                resultCard.classList.remove('hidden');
+
+                if (data.overall_status === 'pass') {
+                    resultCard.className = 'result-card';
+                    resultCard.innerHTML = `
+                        <h2>🎉 Congratulations!</h2>
+                        <div class="score">${data.score}/${data.total}</div>
+                        <p>You have successfully passed the Okta Practical Exam!</p>
+                        <p style="margin-top: 25px; color: #666; font-size: 16px;">
+                            ✅ Your temporary account has been deleted<br>
+                            📧 Results will be sent to your email
+                        </p>
+                    `;
+                } else {
+                    resultCard.className = 'result-card fail';
+                    resultCard.innerHTML = `
+                        <h2>❌ Exam Not Passed</h2>
+                        <div class="score" style="color: #dc3545;">${data.score}/${data.total}</div>
+                        <p>Some tasks were not completed correctly.</p>
+                        <p style="margin-top: 25px; color: #666; font-size: 16px;">
+                            ✅ Your temporary account has been deleted<br>
+                            📧 Detailed results will be sent to your email
+                        </p>
+                    `;
+                }
+
+                resultCard.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                alert('Error validating exam. Please contact administrator.');
+            }
+        }
+    </script>
+</body>
+</html>
