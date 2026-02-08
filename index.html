@@ -546,7 +546,7 @@
                     <p><strong>Process:</strong></p>
                     <ul>
                         <li>Temporary administrator credentials are generated for the supplied email address.</li>
-                        <li>A 30-minute window is provided to complete 4 configuration tasks.</li>
+                        <li>A 30-minute window is provided to complete 6 configuration tasks.</li>
                         <li>Validation runs against the Okta org via backend checks.</li>
                         <li>The temporary account is removed after validation completes.</li>
                     </ul>
@@ -632,6 +632,16 @@
                         <h4>Task 4: Create group</h4>
                         <p>Create the "Summer Interns" group.</p>
                     </div>
+
+                    <div class="task-preview">
+                        <h4>Task 5: Create group rule</h4>
+                        <p>Create a group rule that assigns users to "Summer Interns" when the user title contains "Intern".</p>
+                    </div>
+
+                    <div class="task-preview">
+                        <h4>Task 6: Assign user to group</h4>
+                        <p>Manually add Alexandra Cooper to the "Summer Interns" group.</p>
+                    </div>
                 </div>
             </div>
 
@@ -648,7 +658,7 @@
             <div class="exam-header">
                 <div>
                     <h1 style="text-align: left; margin: 0;">Okta Configuration Checklist</h1>
-                    <p style="color: #4b5563; margin: 5px 0 0 0; font-size: 13px;">Complete all 4 tasks, then submit for validation.</p>
+                    <p style="color: #4b5563; margin: 5px 0 0 0; font-size: 13px;">Complete all 6 tasks, then submit for validation.</p>
                 </div>
                 <div class="timer" id="timer">30:00</div>
             </div>
@@ -758,6 +768,56 @@
                             <label for="check4">Mark task 4 as completed.</label>
                         </div>
                     </div>
+
+                    <!-- Task 5 -->
+                    <div class="task-card" id="task5">
+                        <div class="task-header-row">
+                            <h3>
+                                <span class="task-number">5</span>
+                                Create group rule
+                            </h3>
+                            <span class="status-badge status-pending" id="status5">Pending</span>
+                        </div>
+                        <div class="task-details">
+                            <p><strong>Action:</strong> Create a group rule for the "Summer Interns" group that assigns users when the user title contains the word "Intern".</p>
+                            <ul>
+                                <li><strong>Target group:</strong> Summer Interns</li>
+                                <li><strong>Condition:</strong> Title contains Intern</li>
+                            </ul>
+                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                                Navigation: Directory → Groups → Rules → Add Rule
+                            </p>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="check5" onchange="updateTask(5)">
+                            <label for="check5">Mark task 5 as completed.</label>
+                        </div>
+                    </div>
+
+                    <!-- Task 6 -->
+                    <div class="task-card" id="task6">
+                        <div class="task-header-row">
+                            <h3>
+                                <span class="task-number">6</span>
+                                Assign user to group
+                            </h3>
+                            <span class="status-badge status-pending" id="status6">Pending</span>
+                        </div>
+                        <div class="task-details">
+                            <p><strong>Action:</strong> Manually add Alexandra Cooper to the "Summer Interns" group.</p>
+                            <ul>
+                                <li><strong>User:</strong> Alexandra Cooper</li>
+                                <li><strong>Group:</strong> Summer Interns</li>
+                            </ul>
+                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                                Navigation: Directory → Groups → Summer Interns → Assign People
+                            </p>
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="check6" onchange="updateTask(6)">
+                            <label for="check6">Mark task 6 as completed.</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Sidebar: Progress & Submit -->
@@ -779,6 +839,14 @@
                         <div class="progress-item">
                             <span class="progress-label">Task 4: Group</span>
                             <span class="progress-status pending" id="prog4">○</span>
+                        </div>
+                        <div class="progress-item">
+                            <span class="progress-label">Task 5: Rule</span>
+                            <span class="progress-status pending" id="prog5">○</span>
+                        </div>
+                        <div class="progress-item">
+                            <span class="progress-label">Task 6: Assignment</span>
+                            <span class="progress-status pending" id="prog6">○</span>
                         </div>
                     </div>
 
@@ -894,7 +962,7 @@
                 completedCount--;
             }
 
-            document.getElementById('submitBtn').disabled = completedCount !== 4;
+            document.getElementById('submitBtn').disabled = completedCount !== 6;
         }
 
         async function submitExam() {
