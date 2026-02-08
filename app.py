@@ -11,6 +11,7 @@ CORS(app)
 DOMAIN = os.getenv("OKTA_DOMAIN", "https://integrator-6652914.okta.com")
 TOKEN = os.getenv("OKTA_TOKEN")
 ADMIN_GROUP_ID = os.getenv("ADMIN_GROUP_ID")
+REQUIRED_TASKS = 6
 
 HEADERS = {
     "Authorization": f"SSWS {TOKEN}",
@@ -18,6 +19,13 @@ HEADERS = {
 }
 
 # Helper Functions
+def missing_config():
+    missing = []
+    if not TOKEN:
+        missing.append("OKTA_TOKEN")
+    if not ADMIN_GROUP_ID:
+        missing.append("ADMIN_GROUP_ID")
+    return missing
 def generate_username():
     """Generate random username"""
     rand = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
@@ -43,18 +51,7 @@ def okta_put(url, json=None):
     return requests.put(url, headers=HEADERS, json=json)
 
 def okta_delete(url):
-    return requests.delete(url, headers=HEADERS)
-
-def find_group_by_name(group_name):
-    """Return first matching group object by name (OKTA_GROUP), or None"""
-    try:
-        response = okta_get(f"{DOMAIN}/api/v1/groups", params={"q": group_name})
-        if response.status_code != 200:
-            return None
-
-        groups = response.json() or []
-        for g in groups:
-            profile = g.get("profile", {})
+@@ -58,50 +66,54 @@ def find_group_by_name(group_name):
             if profile.get("name") == group_name:
                 return g
         return None
@@ -80,6 +77,10 @@ def find_user_by_profile_email(email):
 def create_account():
     """Create temporary exam account for candidate"""
     try:
+        missing = missing_config()
+        if missing:
+            return jsonify({"error": f"Missing required config: {', '.join(missing)}"}), 500
+
         data = request.json
         candidate_email = data.get('candidate_email')
         if not candidate_email:
@@ -105,16 +106,7 @@ def create_account():
 
         response = requests.post(
             f"{DOMAIN}/api/v1/users?activate=true",
-            headers=HEADERS,
-            json=payload
-        )
-
-        if response.status_code != 200:
-            print("User creation failed:", response.text)
-            return jsonify({"error": "Failed to create user"}), 500
-
-        user_data = response.json()
-        user_id = user_data["id"]
+@@ -118,50 +130,59 @@ def create_account():
 
         # Assign to admin group
         requests.put(
@@ -140,6 +132,15 @@ def create_account():
 def validate():
     """Validate exam tasks and cleanup account"""
     try:
+        missing = missing_config()
+        if missing:
+            return jsonify({
+                "error": f"Missing required config: {', '.join(missing)}",
+                "overall_status": "fail",
+                "score": 0,
+                "total": REQUIRED_TASKS,
+            }), 500
+
         data = request.json
         user_id = data.get('user_id')
 
@@ -165,40 +166,7 @@ def validate():
         results.append({
             "name": "Custom Attribute",
             "status": attr_result.get("status", "fail")
-        })
-
-        # Task 3: Check attribute value
-        value_result = check_custom_attribute_value(
-            "ben.carter@oktacertified.com",
-            "internId",
-            "INT-2024-07"
-        )
-        results.append({
-            "name": "Attribute Value",
-            "status": value_result.get("status", "fail")
-        })
-
-        # Task 4: Check group
-        group_result = check_group("Summer Interns")
-        results.append({
-            "name": "Group Creation",
-            "status": group_result.get("status", "fail")
-        })
-
-        # Task 5: Check group rule
-        rule_result = check_group_rule_title_contains_intern("Summer Interns")
-        results.append({
-            "name": "Group Rule",
-            "status": rule_result.get("status", "fail")
-        })
-
-        # Task 6: Check manual group assignment
-        member_result = check_user_in_group_by_name(
-            "alexandra.cooper@oktacertified.com",
-            "Summer Interns"
-        )
-        results.append({
-            "name": "Manual Group Assignment",
+@@ -202,51 +223,51 @@ def validate():
             "status": member_result.get("status", "fail")
         })
 
@@ -225,6 +193,7 @@ def validate():
             "overall_status": "fail",
             "score": 0,
             "total": 6
+            "total": REQUIRED_TASKS
         }), 500
 
 def delete_user(user_id):
@@ -250,167 +219,79 @@ def delete_user(user_id):
     except Exception as e:
         return f"Cleanup error: {str(e)}"
 
-# Validation Functions
-def check_user(email, expected_profile):
-    """Check if user exists with correct profile"""
-    try:
-        search_url = f"{DOMAIN}/api/v1/users?search=profile.email eq \\\"{email}\\\""
-        response = requests.get(search_url, headers=HEADERS)
-        if response.status_code != 200:
-            return {"status": "fail"}
+index.html
+index.html
++10
+-2
 
-        users = response.json()
-        if not users:
-            return {"status": "fail"}
+@@ -742,60 +742,68 @@
+    }
 
-        profile = users[0].get("profile", {})
-        all_match = (
-            profile.get("firstName") == expected_profile.get("firstName") and
-            profile.get("lastName") == expected_profile.get("lastName") and
-            profile.get("department") == expected_profile.get("department") and
-            profile.get("title") == expected_profile.get("title")
-        )
-        return {"status": "pass" if all_match else "fail"}
-    except:
-        return {"status": "fail"}
+    /* FIX: wrappers required because HTML uses onchange="updateTask1()" etc. [file:1] */
+    function updateTask1() { updateTask(1); }
+    function updateTask2() { updateTask(2); }
+    function updateTask3() { updateTask(3); }
+    function updateTask4() { updateTask(4); }
+    function updateTask5() { updateTask(5); }
+    function updateTask6() { updateTask(6); }
 
-def check_custom_attribute(variable_name):
-    """Check if custom attribute exists"""
-    try:
-        schema_url = f"{DOMAIN}/api/v1/meta/schemas/user/default"
-        response = requests.get(schema_url, headers=HEADERS)
-        if response.status_code != 200:
-            return {"status": "fail"}
+    async function submitExam() {
+      clearInterval(timerInterval);
 
-        schema = response.json()
-        properties = schema.get("definitions", {}).get("custom", {}).get("properties", {})
-        exists = variable_name in properties
-        return {"status": "pass" if exists else "fail"}
-    except:
-        return {"status": "fail"}
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = 'Validation in progress...';
 
-def check_custom_attribute_value(email, attribute_name, expected_value):
-    """Check if custom attribute has correct value"""
-    try:
-        search_url = f"{DOMAIN}/api/v1/users?search=profile.email eq \\\"{email}\\\""
-        response = requests.get(search_url, headers=HEADERS)
-        if response.status_code != 200:
-            return {"status": "fail"}
+      try {
+        const response = await fetch('https://prokode-exam.onrender.com/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId })
+        });
 
-        users = response.json()
-        if not users:
-            return {"status": "fail"}
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          alert(data.error || 'Validation error. Contact the system administrator.');
+          btn.disabled = false;
+          btn.innerHTML = 'Submit Validation Request';
+          return;
+        }
 
-        profile = users[0].get("profile", {})
-        actual_value = profile.get(attribute_name)
-        is_match = str(actual_value) == str(expected_value)
-        return {"status": "pass" if is_match else "fail"}
-    except:
-        return {"status": "fail"}
+        const resultCard = document.getElementById('resultCard');
+        resultCard.classList.remove('hidden');
+        const total = Number.isFinite(data.total) ? data.total : 6;
 
-def check_group(group_name):
-    """Check if group exists"""
-    try:
-        search_url = f"{DOMAIN}/api/v1/groups?q={group_name}"
-        response = requests.get(search_url, headers=HEADERS)
-        if response.status_code != 200:
-            return {"status": "fail"}
+        if (data.overall_status === 'pass') {
+          resultCard.className = 'result-card';
+          resultCard.innerHTML = `
+            <h2>Validation Result Passed</h2>
+            <div class="score">${data.score}/${data.total}</div>
+            <div class="score">${data.score}/${total}</div>
+            <p>All required checks returned a passing status.</p>
+            <p style="margin-top:12px;color:#4b5563;font-size:13px;">
+              Temporary account cleanup completed.<br />
+              Results will be sent to the provided email address.
+            </p>
+          `;
+        } else {
+          resultCard.className = 'result-card fail';
+          resultCard.innerHTML = `
+            <h2>Validation Result Not Passed</h2>
+            <div class="score" style="color:#111827;">${data.score}/${data.total}</div>
+            <div class="score" style="color:#111827;">${data.score}/${total}</div>
+            <p>One or more checks did not meet the required criteria.</p>
+            <p style="margin-top:12px;color:#4b5563;font-size:13px;">
+              Temporary account cleanup completed.<br />
+              Detailed results will be sent to the provided email address.
+            </p>
+          `;
+        }
 
-        groups = response.json()
-        exists = len(groups) > 0
-        return {"status": "pass" if exists else "fail"}
-    except:
-        return {"status": "fail"}
-
-def check_group_rule_title_contains_intern(target_group_name):
-    """
-    Check if any group rule assigns users to target_group_name with an EL condition
-    that references user.title and contains 'Intern'.
-    """
-    try:
-        group = find_group_by_name(target_group_name)
-        if not group:
-            return {"status": "fail"}
-
-        target_group_id = group.get("id")
-        if not target_group_id:
-            return {"status": "fail"}
-
-        # List all group rules
-        response = okta_get(f"{DOMAIN}/api/v1/groups/rules")
-        if response.status_code != 200:
-            return {"status": "fail"}
-
-        rules = response.json() or []
-        for rule in rules:
-            actions = rule.get("actions", {})
-            assign = actions.get("assignUserToGroups", {})
-            group_ids = assign.get("groupIds", []) or []
-            if target_group_id not in group_ids:
-                continue
-
-            expr_obj = rule.get("conditions", {}).get("expression", {})
-            expr_value = (expr_obj.get("value") or "").strip()
-
-            expr_lc = expr_value.lower()
-            has_title = "user.title" in expr_lc
-            has_intern = "intern" in expr_lc
-            has_contains = "contains" in expr_lc or ".contains(" in expr_lc
-
-            if has_title and has_intern and has_contains:
-                return {"status": "pass"}
-
-        return {"status": "fail"}
-    except:
-        return {"status": "fail"}
-
-def check_user_in_group_by_name(user_email, group_name):
-    """Check if the user (by profile.email) is a member of the specified group."""
-    try:
-        group = find_group_by_name(group_name)
-        if not group:
-            return {"status": "fail"}
-
-        group_id = group.get("id")
-        if not group_id:
-            return {"status": "fail"}
-
-        user = find_user_by_profile_email(user_email)
-        if not user:
-            return {"status": "fail"}
-
-        user_id = user.get("id")
-        if not user_id:
-            return {"status": "fail"}
-
-        response = okta_get(f"{DOMAIN}/api/v1/groups/{group_id}/users", params={"limit": 200})
-        if response.status_code != 200:
-            return {"status": "fail"}
-
-        members = response.json() or []
-        for m in members:
-            if m.get("id") == user_id:
-                return {"status": "pass"}
-
-        return {"status": "fail"}
-    except:
-        return {"status": "fail"}
-
-@app.route('/health', methods=['GET'])
-def health():
-    """Health check"""
-    return jsonify({"status": "healthy"})
-
-if __name__ == '__main__':
-    print("=" * 50)
-    print("🚀 Okta Exam Server Starting...")
-    print("=" * 50)
-    print(f"📍 Okta Tenant: {DOMAIN}")
-    print(f"👥 Admin Group ID: {ADMIN_GROUP_ID}")
-    print("\n📡 Endpoints:")
-    print(" POST /create-account - Create exam account")
-    print(" POST /validate - Validate & cleanup")
-    print(" GET /health - Health check")
-    print("=" * 50)
-
-    app.run(debug=True, port=5000, host='0.0.0.0')
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert('Validation error. Contact the system administrator.');
+      }
+    }
+  </script>
+</body>
+</html>
