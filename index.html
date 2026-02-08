@@ -1,1018 +1,801 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Okta Admin Validation Tool</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f5f7;
-            min-height: 100vh;
-            padding: 20px;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff;
-            border: 1px solid #d6d9dd;
-            border-radius: 6px;
-            padding: 28px;
-            min-height: 90vh;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        h1 {
-            color: #111827;
-            text-align: center;
-            margin-bottom: 8px;
-            font-size: 26px;
-            font-weight: 600;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #4b5563;
-            margin-bottom: 26px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Page 1: Email Input */
-        .email-section {
-            max-width: 720px;
-            margin: 36px auto;
-            text-align: left;
-        }
-
-        .email-section .intro {
-            font-size: 14px;
-            color: #374151;
-            margin-bottom: 18px;
-            line-height: 1.7;
-        }
-
-        .email-section .intro ul {
-            margin: 12px 0 12px 22px;
-        }
-
-        .email-section .intro li {
-            margin-bottom: 8px;
-        }
-
-        .email-input {
-            width: 100%;
-            padding: 12px 12px;
-            font-size: 14px;
-            border: 1px solid #cfd5dc;
-            border-radius: 4px;
-            margin-bottom: 12px;
-            background: #ffffff;
-            color: #111827;
-        }
-
-        .email-input:focus {
-            outline: none;
-            border-color: #1662dd;
-            box-shadow: 0 0 0 3px rgba(22, 98, 221, 0.15);
-        }
-
-        .btn {
-            background: #1662dd;
-            color: #ffffff;
-            border: 1px solid #165bcc;
-            padding: 12px 16px;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.15s ease, border-color 0.15s ease;
-        }
-
-        .btn:hover {
-            background: #1356c3;
-            border-color: #124eb3;
-        }
-
-        .btn:disabled {
-            background: #c8ced6;
-            border-color: #c8ced6;
-            cursor: not-allowed;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        /* Page 2: Credentials & Preparation */
-        .prep-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-top: 18px;
-        }
-
-        .credentials-panel {
-            background: #f8fafc;
-            padding: 18px;
-            border-radius: 6px;
-            border: 1px solid #d6d9dd;
-            color: #111827;
-        }
-
-        .credentials-panel h2 {
-            margin-bottom: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-        }
-
-        .cred-item {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border: 1px solid #e3e7eb;
-        }
-
-        .cred-label {
-            font-size: 12px;
-            color: #4b5563;
-            margin-bottom: 6px;
-            text-transform: none;
-            letter-spacing: 0;
-            font-weight: 600;
-        }
-
-        .cred-value {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: 600;
-            word-break: break-all;
-            color: #111827;
-        }
-
-        .cred-link {
-            color: #1662dd;
-            text-decoration: underline;
-        }
-
-        .instructions-panel {
-            background: #f8fafc;
-            padding: 18px;
-            border-radius: 6px;
-            border: 1px solid #d6d9dd;
-        }
-
-        .instructions-panel h2 {
-            color: #111827;
-            margin-bottom: 14px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .task-preview {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border: 1px solid #e3e7eb;
-        }
-
-        .task-preview h4 {
-            color: #111827;
-            margin-bottom: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .task-preview p {
-            color: #4b5563;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .ready-section {
-            margin-top: 18px;
-            padding-top: 16px;
-            border-top: 1px solid #e3e7eb;
-            text-align: left;
-        }
-
-        .ready-section p {
-            font-size: 13px;
-            color: #4b5563;
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-
-        .ready-section .btn {
-            font-size: 14px;
-            padding: 12px 16px;
-        }
-
-        /* Page 3: Validation */
-        .exam-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #e3e7eb;
-        }
-
-        .timer {
-            background: #1f2937;
-            color: #ffffff;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 18px;
-            font-weight: 700;
-            min-width: 96px;
-            text-align: center;
-        }
-
-        .exam-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 16px;
-        }
-
-        .tasks-column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .sidebar-column {
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-        }
-
-        .task-card {
-            background: #ffffff;
-            padding: 16px;
-            border-radius: 6px;
-            border: 1px solid #d6d9dd;
-        }
-
-        .task-card.completed {
-            background: #f3f8ff;
-            border-color: #b8cff7;
-        }
-
-        .task-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
-
-        .task-card h3 {
-            color: #111827;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
-
-        .task-number {
-            background: #e5e7eb;
-            color: #111827;
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            border: 1px solid #d1d5db;
-        }
-
-        .task-card.completed .task-number {
-            background: #dbeafe;
-            border-color: #bfdbfe;
-        }
-
-        .status-badge {
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid transparent;
-            white-space: nowrap;
-        }
-
-        .status-pending {
-            background: #f3f4f6;
-            color: #4b5563;
-            border-color: #e5e7eb;
-        }
-
-        .status-done {
-            background: #e8f1ff;
-            color: #0b3a8a;
-            border-color: #bfd6ff;
-        }
-
-        .task-details {
-            color: #374151;
-            margin: 10px 0;
-            line-height: 1.7;
-            font-size: 13px;
-        }
-
-        .task-details ul {
-            margin: 8px 0 8px 20px;
-        }
-
-        .task-details li {
-            margin-bottom: 6px;
-        }
-
-        .task-details strong {
-            color: #111827;
-        }
-
-        .checkbox-wrapper {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 12px;
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 6px;
-            cursor: pointer;
-            border: 1px solid #e3e7eb;
-        }
-
-        .checkbox-wrapper:hover {
-            background: #f3f4f6;
-        }
-
-        .checkbox-wrapper input {
-            margin-top: 2px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #1662dd;
-        }
-
-        .checkbox-wrapper label {
-            cursor: pointer;
-            font-size: 13px;
-            color: #111827;
-            line-height: 1.5;
-        }
-
-        /* Sidebar */
-        .sidebar-card {
-            background: #ffffff;
-            padding: 16px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            border: 1px solid #d6d9dd;
-        }
-
-        .sidebar-card h3 {
-            color: #111827;
-            margin-bottom: 12px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .progress-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .progress-item:last-child {
-            border-bottom: none;
-        }
-
-        .progress-label {
-            font-size: 13px;
-            color: #4b5563;
-        }
-
-        .progress-status {
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .progress-status.done {
-            color: #0b3a8a;
-        }
-
-        .progress-status.pending {
-            color: #9aa3af;
-        }
-
-        .submit-section {
-            background: #fff;
-            border: 1px solid #d6d9dd;
-            padding: 16px;
-            border-radius: 6px;
-            text-align: left;
-        }
-
-        .submit-section p {
-            color: #4b5563;
-            margin-bottom: 10px;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        /* Results */
-        .result-card {
-            background: #f8fafc;
-            border: 1px solid #d6d9dd;
-            padding: 18px;
-            border-radius: 6px;
-            margin-top: 16px;
-            text-align: left;
-        }
-
-        .result-card.fail {
-            background: #f8fafc;
-            border-color: #d6d9dd;
-        }
-
-        .result-card h2 {
-            margin-bottom: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .result-card .score {
-            font-size: 28px;
-            font-weight: 800;
-            margin: 10px 0;
-            color: #111827;
-        }
-
-        .result-card p {
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #374151;
-            line-height: 1.6;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(255,255,255,.35);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .alert-box {
-            background: #f8fafc;
-            border: 1px solid #d6d9dd;
-            padding: 14px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            color: #374151;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .alert-box strong {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            color: #111827;
-        }
-
-        @media (max-width: 980px) {
-            .prep-layout, .exam-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar-column {
-                position: static;
-            }
-
-            .container {
-                padding: 18px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Okta Admin Validation Tool</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f5f7;
+      min-height: 100vh;
+      padding: 20px;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #d6d9dd;
+      border-radius: 6px;
+      padding: 28px;
+      min-height: 90vh;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    h1 {
+      color: #111827;
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 26px;
+      font-weight: 600;
+    }
+    .subtitle {
+      text-align: center;
+      color: #4b5563;
+      margin-bottom: 26px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Page 1 */
+    .email-section {
+      max-width: 720px;
+      margin: 36px auto;
+      text-align: left;
+    }
+    .email-section .intro {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 18px;
+      line-height: 1.7;
+    }
+    .email-section .intro ul { margin: 12px 0 12px 22px; }
+    .email-section .intro li { margin-bottom: 8px; }
+
+    .email-input {
+      width: 100%;
+      padding: 12px 12px;
+      font-size: 14px;
+      border: 1px solid #cfd5dc;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      background: #ffffff;
+      color: #111827;
+    }
+    .email-input:focus {
+      outline: none;
+      border-color: #1662dd;
+      box-shadow: 0 0 0 3px rgba(22, 98, 221, 0.15);
+    }
+
+    .btn {
+      background: #1662dd;
+      color: #ffffff;
+      border: 1px solid #165bcc;
+      padding: 12px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .btn:hover { background: #1356c3; border-color: #124eb3; }
+    .btn:disabled { background: #c8ced6; border-color: #c8ced6; cursor: not-allowed; }
+    .btn-full { width: 100%; }
+
+    /* Page 2 */
+    .prep-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .credentials-panel, .instructions-panel {
+      background: #f8fafc;
+      padding: 18px;
+      border-radius: 6px;
+      border: 1px solid #d6d9dd;
+      color: #111827;
+    }
+    .credentials-panel h2, .instructions-panel h2 {
+      margin-bottom: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .cred-item, .task-preview {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border: 1px solid #e3e7eb;
+    }
+    .cred-label {
+      font-size: 12px;
+      color: #4b5563;
+      margin-bottom: 6px;
+      letter-spacing: 0;
+      font-weight: 600;
+    }
+    .cred-value {
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      font-weight: 600;
+      word-break: break-all;
+      color: #111827;
+    }
+    .cred-link { color: #1662dd; text-decoration: underline; }
+
+    .task-preview h4 {
+      color: #111827;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .task-preview p {
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .ready-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #e3e7eb;
+      text-align: left;
+    }
+    .ready-section p {
+      font-size: 13px;
+      color: #4b5563;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .ready-section .btn { font-size: 14px; padding: 12px 16px; }
+
+    .alert-box {
+      background: #f8fafc;
+      border: 1px solid #d6d9dd;
+      padding: 14px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      color: #374151;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .alert-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #111827;
+    }
+
+    /* Page 3 */
+    .exam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e3e7eb;
+    }
+    .timer {
+      background: #1f2937;
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 96px;
+      text-align: center;
+    }
+    .exam-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+    .tasks-column { display: flex; flex-direction: column; gap: 12px; }
+    .sidebar-column { position: sticky; top: 20px; height: fit-content; }
+
+    .task-card {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 6px;
+      border: 1px solid #d6d9dd;
+    }
+    .task-card.completed { background: #f3f8ff; border-color: #b8cff7; }
+
+    .task-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .task-card h3 {
+      color: #111827;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    .task-number {
+      background: #e5e7eb;
+      color: #111827;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid #d1d5db;
+    }
+    .task-card.completed .task-number { background: #dbeafe; border-color: #bfdbfe; }
+
+    .status-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .status-pending { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
+    .status-done { background: #e8f1ff; color: #0b3a8a; border-color: #bfd6ff; }
+
+    .task-details {
+      color: #374151;
+      margin: 10px 0;
+      line-height: 1.7;
+      font-size: 13px;
+    }
+    .task-details ul { margin: 8px 0 8px 20px; }
+    .task-details li { margin-bottom: 6px; }
+    .task-details strong { color: #111827; }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #e3e7eb;
+    }
+    .checkbox-wrapper:hover { background: #f3f4f6; }
+    .checkbox-wrapper input {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #1662dd;
+    }
+    .checkbox-wrapper label {
+      cursor: pointer;
+      font-size: 13px;
+      color: #111827;
+      line-height: 1.5;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      border: 1px solid #d6d9dd;
+    }
+    .sidebar-card h3 {
+      color: #111827;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .progress-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .progress-item:last-child { border-bottom: none; }
+    .progress-label { font-size: 13px; color: #4b5563; }
+    .progress-status { font-weight: 700; font-size: 13px; }
+    .progress-status.done { color: #0b3a8a; }
+    .progress-status.pending { color: #9aa3af; }
+
+    .submit-section {
+      background: #fff;
+      border: 1px solid #d6d9dd;
+      padding: 16px;
+      border-radius: 6px;
+      text-align: left;
+    }
+    .submit-section p {
+      color: #4b5563;
+      margin-bottom: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Results */
+    .result-card {
+      background: #f8fafc;
+      border: 1px solid #d6d9dd;
+      padding: 18px;
+      border-radius: 6px;
+      margin-top: 16px;
+      text-align: left;
+    }
+    .result-card.fail { background: #f8fafc; border-color: #d6d9dd; }
+    .result-card h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .result-card .score {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 10px 0;
+      color: #111827;
+    }
+    .result-card p {
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .hidden { display: none; }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255, 255, 255, .35);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 980px) {
+      .prep-layout, .exam-layout { grid-template-columns: 1fr; }
+      .sidebar-column { position: static; }
+      .container { padding: 18px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- PAGE 1: Email Input -->
-        <div id="page1" class="page active">
-            <h1>Okta Admin Validation</h1>
-            <p class="subtitle">Provision temporary access and validate required configuration changes.</p>
+  <div class="container">
 
-            <div class="email-section">
-                <div class="intro">
-                    <p><strong>Purpose:</strong> This workflow provisions a temporary administrator account and validates specific Okta Admin Console changes using API-based checks.</p>
+    <!-- PAGE 1 -->
+    <div id="page1" class="page active">
+      <h1>Okta Admin Validation</h1>
+      <p class="subtitle">Provision temporary access and validate required configuration changes.</p>
 
-                    <p><strong>Process:</strong></p>
-                    <ul>
-                        <li>Temporary administrator credentials are generated for the supplied email address.</li>
-                        <li>A 30-minute window is provided to complete 6 configuration tasks.</li>
-                        <li>Validation runs against the Okta org via backend checks.</li>
-                        <li>The temporary account is removed after validation completes.</li>
-                    </ul>
-
-                    <p><strong>Requester email address:</strong></p>
-                </div>
-
-                <input
-                    type="email"
-                    class="email-input"
-                    id="candidateEmail"
-                    placeholder="name@company.com"
-                    required
-                >
-
-                <button class="btn btn-full" onclick="createAccount()">
-                    <span id="btnText">Provision Temporary Admin Account</span>
-                    <span id="btnSpinner" class="spinner hidden"></span>
-                </button>
-            </div>
+      <div class="email-section">
+        <div class="intro">
+          <p><strong>Purpose:</strong> This workflow provisions a temporary administrator account and validates specific Okta Admin Console changes using API-based checks.</p>
+          <p style="margin-top:10px;"><strong>Process:</strong></p>
+          <ul>
+            <li>Temporary administrator credentials are generated for the supplied email address.</li>
+            <li>A 30-minute window is provided to complete 6 configuration tasks.</li>
+            <li>Validation runs against the Okta org via backend checks.</li>
+            <li>The temporary account is removed after validation completes.</li>
+          </ul>
         </div>
 
-        <!-- PAGE 2: Credentials & Preparation -->
-        <div id="page2" class="page">
-            <h1>Access Details</h1>
-            <p class="subtitle">Use the information below to sign in and complete the required tasks.</p>
-
-            <div class="alert-box">
-                <strong>Operational note:</strong>
-                Copy the credentials and open the Okta Admin Console in a new tab. Keep this page open for task tracking and submission.
-            </div>
-
-            <div class="prep-layout">
-                <!-- Left: Credentials -->
-                <div class="credentials-panel">
-                    <h2>Sign-in Information</h2>
-
-                    <div class="cred-item">
-                        <div class="cred-label">Okta Admin Console</div>
-                        <div class="cred-value">
-                            <a href="https://integrator-6652914.okta.com/admin" target="_blank" class="cred-link">
-                                integrator-6652914.okta.com
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="cred-item">
-                        <div class="cred-label">Username</div>
-                        <div class="cred-value" id="displayUsername">---</div>
-                    </div>
-
-                    <div class="cred-item">
-                        <div class="cred-label">Password</div>
-                        <div class="cred-value" id="displayPassword">---</div>
-                    </div>
-
-                    <div class="cred-item">
-                        <div class="cred-label">Email address (MFA)</div>
-                        <div class="cred-value" id="displayEmail" style="font-size: 13px;">---</div>
-                    </div>
-                </div>
-
-                <!-- Right: Task Overview -->
-                <div class="instructions-panel">
-                    <h2>Required Changes</h2>
-
-                    <div class="task-preview">
-                        <h4>Task 1: Create user</h4>
-                        <p>Create user Ben Carter with the required profile attributes.</p>
-                    </div>
-
-                    <div class="task-preview">
-                        <h4>Task 2: Add custom attribute</h4>
-                        <p>Add the "internId" attribute to the default user profile schema.</p>
-                    </div>
-
-                    <div class="task-preview">
-                        <h4>Task 3: Set attribute value</h4>
-                        <p>Set the internId value for Ben Carter.</p>
-                    </div>
-
-                    <div class="task-preview">
-                        <h4>Task 4: Create group</h4>
-                        <p>Create the "Summer Interns" group.</p>
-                    </div>
-
-                    <div class="task-preview">
-                        <h4>Task 5: Create group rule</h4>
-                        <p>Create a group rule that assigns users to "Summer Interns" when the user title contains "Intern".</p>
-                    </div>
-
-                    <div class="task-preview">
-                        <h4>Task 6: Assign user to group</h4>
-                        <p>Manually add Alexandra Cooper to the "Summer Interns" group.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ready-section">
-                <p><strong>Start window:</strong> The 30-minute timer starts when you proceed.</p>
-                <button class="btn" onclick="startExam()">
-                    Proceed to Task Checklist
-                </button>
-            </div>
-        </div>
-
-        <!-- PAGE 3: Exam -->
-        <div id="page3" class="page">
-            <div class="exam-header">
-                <div>
-                    <h1 style="text-align: left; margin: 0;">Okta Configuration Checklist</h1>
-                    <p style="color: #4b5563; margin: 5px 0 0 0; font-size: 13px;">Complete all 6 tasks, then submit for validation.</p>
-                </div>
-                <div class="timer" id="timer">30:00</div>
-            </div>
-
-            <div class="exam-layout">
-                <!-- Main: Tasks -->
-                <div class="tasks-column">
-                    <!-- Task 1 -->
-                    <div class="task-card" id="task1">
-                        <div class="task-header-row">
-                            <h3>
-                                <span class="task-number">1</span>
-                                Create user
-                            </h3>
-                            <span class="status-badge status-pending" id="status1">Pending</span>
-                        </div>
-                        <div class="task-details">
-                            <p><strong>Action:</strong> Create a new user in the Okta Admin Console with the following values:</p>
-                            <ul>
-                                <li><strong>Email/Login:</strong> ben.carter@oktacertified.com</li>
-                                <li><strong>First Name:</strong> Ben</li>
-                                <li><strong>Last Name:</strong> Carter</li>
-                                <li><strong>Department:</strong> Technology</li>
-                                <li><strong>Job Title:</strong> IT Intern</li>
-                            </ul>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                                Navigation: Directory → People → Add Person
-                            </p>
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="check1" onchange="updateTask(1)">
-                            <label for="check1">Mark task 1 as completed.</label>
-                        </div>
-                    </div>
-
-                    <!-- Task 2 -->
-                    <div class="task-card" id="task2">
-                        <div class="task-header-row">
-                            <h3>
-                                <span class="task-number">2</span>
-                                Add custom attribute
-                            </h3>
-                            <span class="status-badge status-pending" id="status2">Pending</span>
-                        </div>
-                        <div class="task-details">
-                            <p><strong>Action:</strong> Add a custom user profile attribute with the following values:</p>
-                            <ul>
-                                <li><strong>Variable Name:</strong> internId</li>
-                                <li><strong>Display Name:</strong> Intern ID</li>
-                                <li><strong>Attribute Type:</strong> String</li>
-                                <li><strong>Read-only:</strong> Yes (Enabled)</li>
-                            </ul>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                                Navigation: Directory → Profile Editor → User (default) → Add Attribute
-                            </p>
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="check2" onchange="updateTask(2)">
-                            <label for="check2">Mark task 2 as completed.</label>
-                        </div>
-                    </div>
-
-                    <!-- Task 3 -->
-                    <div class="task-card" id="task3">
-                        <div class="task-header-row">
-                            <h3>
-                                <span class="task-number">3</span>
-                                Set attribute value
-                            </h3>
-                            <span class="status-badge status-pending" id="status3">Pending</span>
-                        </div>
-                        <div class="task-details">
-                            <p><strong>Action:</strong> For Ben Carter, set the custom attribute to the value below:</p>
-                            <ul>
-                                <li><strong>Intern ID:</strong> INT-2024-07</li>
-                            </ul>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                                Navigation: Directory → People → Ben Carter → Edit Profile → Set Intern ID value
-                            </p>
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="check3" onchange="updateTask(3)">
-                            <label for="check3">Mark task 3 as completed.</label>
-                        </div>
-                    </div>
-
-                    <!-- Task 4 -->
-                    <div class="task-card" id="task4">
-                        <div class="task-header-row">
-                            <h3>
-                                <span class="task-number">4</span>
-                                Create group
-                            </h3>
-                            <span class="status-badge status-pending" id="status4">Pending</span>
-                        </div>
-                        <div class="task-details">
-                            <p><strong>Action:</strong> Create a new group with the following value:</p>
-                            <ul>
-                                <li><strong>Group Name:</strong> Summer Interns</li>
-                            </ul>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                                Navigation: Directory → Groups → Add Group
-                            </p>
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="check4" onchange="updateTask(4)">
-                            <label for="check4">Mark task 4 as completed.</label>
-                        </div>
-                    </div>
-
-                    <!-- Task 5 -->
-                    <div class="task-card" id="task5">
-                        <div class="task-header-row">
-                            <h3>
-                                <span class="task-number">5</span>
-                                Create group rule
-                            </h3>
-                            <span class="status-badge status-pending" id="status5">Pending</span>
-                        </div>
-                        <div class="task-details">
-                            <p><strong>Action:</strong> Create a group rule for the "Summer Interns" group that assigns users when the user title contains the word "Intern".</p>
-                            <ul>
-                                <li><strong>Target group:</strong> Summer Interns</li>
-                                <li><strong>Condition:</strong> Title contains Intern</li>
-                            </ul>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                                Navigation: Directory → Groups → Rules → Add Rule
-                            </p>
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="check5" onchange="updateTask(5)">
-                            <label for="check5">Mark task 5 as completed.</label>
-                        </div>
-                    </div>
-
-                    <!-- Task 6 -->
-                    <div class="task-card" id="task6">
-                        <div class="task-header-row">
-                            <h3>
-                                <span class="task-number">6</span>
-                                Assign user to group
-                            </h3>
-                            <span class="status-badge status-pending" id="status6">Pending</span>
-                        </div>
-                        <div class="task-details">
-                            <p><strong>Action:</strong> Manually add Alexandra Cooper to the "Summer Interns" group.</p>
-                            <ul>
-                                <li><strong>User:</strong> Alexandra Cooper</li>
-                                <li><strong>Group:</strong> Summer Interns</li>
-                            </ul>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                                Navigation: Directory → Groups → Summer Interns → Assign People
-                            </p>
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" id="check6" onchange="updateTask(6)">
-                            <label for="check6">Mark task 6 as completed.</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar: Progress & Submit -->
-                <div class="sidebar-column">
-                    <div class="sidebar-card">
-                        <h3>Task Status</h3>
-                        <div class="progress-item">
-                            <span class="progress-label">Task 1: User</span>
-                            <span class="progress-status pending" id="prog1">○</span>
-                        </div>
-                        <div class="progress-item">
-                            <span class="progress-label">Task 2: Attribute</span>
-                            <span class="progress-status pending" id="prog2">○</span>
-                        </div>
-                        <div class="progress-item">
-                            <span class="progress-label">Task 3: Value</span>
-                            <span class="progress-status pending" id="prog3">○</span>
-                        </div>
-                        <div class="progress-item">
-                            <span class="progress-label">Task 4: Group</span>
-                            <span class="progress-status pending" id="prog4">○</span>
-                        </div>
-                        <div class="progress-item">
-                            <span class="progress-label">Task 5: Rule</span>
-                            <span class="progress-status pending" id="prog5">○</span>
-                        </div>
-                        <div class="progress-item">
-                            <span class="progress-label">Task 6: Assignment</span>
-                            <span class="progress-status pending" id="prog6">○</span>
-                        </div>
-                    </div>
-
-                    <div class="submit-section">
-                        <p><strong>Submission requirement:</strong> All tasks must be marked completed before validation can be submitted.</p>
-                        <button class="btn btn-full" id="submitBtn" onclick="submitExam()" disabled>
-                            Submit Validation Request
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Results -->
-            <div class="result-card hidden" id="resultCard"></div>
-        </div>
+        <p style="margin-bottom:8px;"><strong>Requester email address</strong></p>
+        <input type="email" class="email-input" id="candidateEmail" placeholder="name@company.com" required />
+        <button class="btn btn-full" onclick="createAccount()">
+          <span id="btnText">Provision Temporary Admin Account</span>
+          <span id="btnSpinner" class="spinner hidden"></span>
+        </button>
+      </div>
     </div>
 
-    <script>
-        let timeLeft = 30 * 60;
-        let timerInterval;
-        let userId = null;
-        let completedCount = 0;
+    <!-- PAGE 2 -->
+    <div id="page2" class="page">
+      <h1>Access Details</h1>
+      <p class="subtitle">Use the information below to sign in and complete the required tasks.</p>
 
-        async function createAccount() {
-            const email = document.getElementById('candidateEmail').value.trim();
-            
-            if (!email || !email.includes('@')) {
-                alert('Enter a valid email address');
-                return;
-            }
+      <div class="alert-box">
+        <strong>Operational notes</strong>
+        Copy the credentials and open the Okta Admin Console in a new tab. Keep this page open for task tracking and submission.
+      </div>
 
-            document.getElementById('btnText').classList.add('hidden');
-            document.getElementById('btnSpinner').classList.remove('hidden');
-            document.querySelector('.btn').disabled = true;
+      <div class="prep-layout">
+        <!-- Left -->
+        <div class="credentials-panel">
+          <h2>Sign-in Information</h2>
 
-            try {
-                const response = await fetch('https://prokode-exam.onrender.com/create-account', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ candidate_email: email })
-                });
+          <div class="cred-item">
+            <div class="cred-label">Okta Admin Console</div>
+            <div class="cred-value">
+              <a href="https://integrator-6652914.okta.com/admin" target="_blank" class="cred-link">integrator-6652914.okta.com</a>
+            </div>
+          </div>
 
-                const data = await response.json();
+          <div class="cred-item">
+            <div class="cred-label">Username</div>
+            <div class="cred-value" id="displayUsername">---</div>
+          </div>
 
-                if (response.ok) {
-                    userId = data.user_id;
-                    document.getElementById('displayUsername').textContent = data.username;
-                    document.getElementById('displayPassword').textContent = data.password;
-                    document.getElementById('displayEmail').textContent = email;
+          <div class="cred-item">
+            <div class="cred-label">Password</div>
+            <div class="cred-value" id="displayPassword">---</div>
+          </div>
 
-                    document.getElementById('page1').classList.remove('active');
-                    document.getElementById('page2').classList.add('active');
-                } else {
-                    alert('Error: ' + (data.error || 'Could not create account'));
-                    document.getElementById('btnText').classList.remove('hidden');
-                    document.getElementById('btnSpinner').classList.add('hidden');
-                    document.querySelector('.btn').disabled = false;
-                }
-            } catch (error) {
-                alert('Connection error. Make sure backend is running.');
-                document.getElementById('btnText').classList.remove('hidden');
-                document.getElementById('btnSpinner').classList.add('hidden');
-                document.querySelector('.btn').disabled = false;
-            }
+          <div class="cred-item">
+            <div class="cred-label">Email address (MFA)</div>
+            <div class="cred-value" id="displayEmail" style="font-size: 13px;">---</div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div class="instructions-panel">
+          <h2>Required Changes</h2>
+
+          <div class="task-preview">
+            <h4>Task 1 Create user</h4>
+            <p>Create user Ben Carter with the required profile attributes.</p>
+          </div>
+          <div class="task-preview">
+            <h4>Task 2 Add custom attribute</h4>
+            <p>Add the internId attribute to the default user profile schema.</p>
+          </div>
+          <div class="task-preview">
+            <h4>Task 3 Set attribute value</h4>
+            <p>Set the internId value for Ben Carter.</p>
+          </div>
+          <div class="task-preview">
+            <h4>Task 4 Create group</h4>
+            <p>Create the Summer Interns group.</p>
+          </div>
+          <div class="task-preview">
+            <h4>Task 5 Create group rule</h4>
+            <p>Create a group rule that assigns users to Summer Interns when the user title contains Intern.</p>
+          </div>
+          <div class="task-preview">
+            <h4>Task 6 Assign user to group</h4>
+            <p>Manually add Alexandra Cooper to the Summer Interns group.</p>
+          </div>
+
+          <div class="ready-section">
+            <p><strong>Start window</strong> The 30-minute timer starts when you proceed.</p>
+            <button class="btn" onclick="startExam()">Proceed to Task Checklist</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div id="page3" class="page">
+      <div class="exam-header">
+        <div>
+          <h1 style="text-align:left;margin:0;">Okta Configuration Checklist</h1>
+          <p style="color:#4b5563;margin:5px 0 0 0;font-size:13px;">Complete all 6 tasks, then submit for validation.</p>
+        </div>
+        <div class="timer" id="timer">30:00</div>
+      </div>
+
+      <div class="exam-layout">
+        <!-- Main -->
+        <div class="tasks-column">
+
+          <!-- Task 1 -->
+          <div class="task-card" id="task1">
+            <div class="task-header-row">
+              <h3><span class="task-number">1</span> Create user</h3>
+              <span class="status-badge status-pending" id="status1">Pending</span>
+            </div>
+            <div class="task-details">
+              <p><strong>Action</strong> Create a new user in the Okta Admin Console with the following values:</p>
+              <ul>
+                <li><strong>Email/Login</strong> ben.carter@oktacertified.com</li>
+                <li><strong>First Name</strong> Ben</li>
+                <li><strong>Last Name</strong> Carter</li>
+                <li><strong>Department</strong> Technology</li>
+                <li><strong>Job Title</strong> IT Intern</li>
+              </ul>
+              <p style="font-size:12px;color:#6b7280;margin-top:8px;">Navigation: Directory → People → Add Person</p>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="check1" onchange="updateTask1()" />
+              <label for="check1">Mark task 1 as completed.</label>
+            </div>
+          </div>
+
+          <!-- Task 2 -->
+          <div class="task-card" id="task2">
+            <div class="task-header-row">
+              <h3><span class="task-number">2</span> Add custom attribute</h3>
+              <span class="status-badge status-pending" id="status2">Pending</span>
+            </div>
+            <div class="task-details">
+              <p><strong>Action</strong> Add a custom user profile attribute with the following values:</p>
+              <ul>
+                <li><strong>Variable Name</strong> internId</li>
+                <li><strong>Display Name</strong> Intern ID</li>
+                <li><strong>Attribute Type</strong> String</li>
+                <li><strong>Read-only</strong> Yes (Enabled)</li>
+              </ul>
+              <p style="font-size:12px;color:#6b7280;margin-top:8px;">Navigation: Directory → Profile Editor → User (default) → Add Attribute</p>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="check2" onchange="updateTask2()" />
+              <label for="check2">Mark task 2 as completed.</label>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="task-card" id="task3">
+            <div class="task-header-row">
+              <h3><span class="task-number">3</span> Set attribute value</h3>
+              <span class="status-badge status-pending" id="status3">Pending</span>
+            </div>
+            <div class="task-details">
+              <p><strong>Action</strong> For Ben Carter, set the custom attribute to the value below:</p>
+              <ul>
+                <li><strong>Intern ID</strong> INT-2024-07</li>
+              </ul>
+              <p style="font-size:12px;color:#6b7280;margin-top:8px;">Navigation: Directory → People → Ben Carter → Edit Profile → Set Intern ID value</p>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="check3" onchange="updateTask3()" />
+              <label for="check3">Mark task 3 as completed.</label>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="task-card" id="task4">
+            <div class="task-header-row">
+              <h3><span class="task-number">4</span> Create group</h3>
+              <span class="status-badge status-pending" id="status4">Pending</span>
+            </div>
+            <div class="task-details">
+              <p><strong>Action</strong> Create a new group with the following value:</p>
+              <ul>
+                <li><strong>Group Name</strong> Summer Interns</li>
+              </ul>
+              <p style="font-size:12px;color:#6b7280;margin-top:8px;">Navigation: Directory → Groups → Add Group</p>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="check4" onchange="updateTask4()" />
+              <label for="check4">Mark task 4 as completed.</label>
+            </div>
+          </div>
+
+          <!-- Task 5 -->
+          <div class="task-card" id="task5">
+            <div class="task-header-row">
+              <h3><span class="task-number">5</span> Create group rule</h3>
+              <span class="status-badge status-pending" id="status5">Pending</span>
+            </div>
+            <div class="task-details">
+              <p><strong>Action</strong> Create a group rule for the Summer Interns group that assigns users when the user title contains the word Intern.</p>
+              <ul>
+                <li><strong>Target group</strong> Summer Interns</li>
+                <li><strong>Condition</strong> Title contains Intern</li>
+              </ul>
+              <p style="font-size:12px;color:#6b7280;margin-top:8px;">Navigation: Directory → Groups → Rules → Add Rule</p>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="check5" onchange="updateTask5()" />
+              <label for="check5">Mark task 5 as completed.</label>
+            </div>
+          </div>
+
+          <!-- Task 6 -->
+          <div class="task-card" id="task6">
+            <div class="task-header-row">
+              <h3><span class="task-number">6</span> Assign user to group</h3>
+              <span class="status-badge status-pending" id="status6">Pending</span>
+            </div>
+            <div class="task-details">
+              <p><strong>Action</strong> Manually add Alexandra Cooper to the Summer Interns group.</p>
+              <ul>
+                <li><strong>User</strong> Alexandra Cooper</li>
+                <li><strong>Group</strong> Summer Interns</li>
+              </ul>
+              <p style="font-size:12px;color:#6b7280;margin-top:8px;">Navigation: Directory → Groups → Summer Interns → Assign People</p>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="check6" onchange="updateTask6()" />
+              <label for="check6">Mark task 6 as completed.</label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar-column">
+          <div class="sidebar-card">
+            <h3>Task Status</h3>
+            <div class="progress-item"><span class="progress-label">Task 1 User</span><span class="progress-status pending" id="prog1">Pending</span></div>
+            <div class="progress-item"><span class="progress-label">Task 2 Attribute</span><span class="progress-status pending" id="prog2">Pending</span></div>
+            <div class="progress-item"><span class="progress-label">Task 3 Value</span><span class="progress-status pending" id="prog3">Pending</span></div>
+            <div class="progress-item"><span class="progress-label">Task 4 Group</span><span class="progress-status pending" id="prog4">Pending</span></div>
+            <div class="progress-item"><span class="progress-label">Task 5 Rule</span><span class="progress-status pending" id="prog5">Pending</span></div>
+            <div class="progress-item"><span class="progress-label">Task 6 Assignment</span><span class="progress-status pending" id="prog6">Pending</span></div>
+          </div>
+
+          <div class="submit-section">
+            <p><strong>Submission requirement</strong> All tasks must be marked completed before validation can be submitted.</p>
+            <button class="btn btn-full" id="submitBtn" onclick="submitExam()" disabled>Submit Validation Request</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-card hidden" id="resultCard"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let timeLeft = 30 * 60;
+    let timerInterval;
+    let userId = null;
+    let completedCount = 0;
+
+    async function createAccount() {
+      const email = document.getElementById('candidateEmail').value.trim();
+      if (!email || !email.includes('@')) {
+        alert('Enter a valid email address');
+        return;
+      }
+
+      document.getElementById('btnText').classList.add('hidden');
+      document.getElementById('btnSpinner').classList.remove('hidden');
+      document.querySelector('.btn').disabled = true;
+
+      try {
+        const response = await fetch('https://prokode-exam.onrender.com/create-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidate_email: email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          userId = data.user_id;
+          document.getElementById('displayUsername').textContent = data.username;
+          document.getElementById('displayPassword').textContent = data.password;
+          document.getElementById('displayEmail').textContent = email;
+
+          document.getElementById('page1').classList.remove('active');
+          document.getElementById('page2').classList.add('active');
+        } else {
+          alert('Error: ' + (data.error || 'Could not create account'));
+          document.getElementById('btnText').classList.remove('hidden');
+          document.getElementById('btnSpinner').classList.add('hidden');
+          document.querySelector('.btn').disabled = false;
+        }
+      } catch (error) {
+        alert('Connection error. Make sure backend is running.');
+        document.getElementById('btnText').classList.remove('hidden');
+        document.getElementById('btnSpinner').classList.add('hidden');
+        document.querySelector('.btn').disabled = false;
+      }
+    }
+
+    function startExam() {
+      document.getElementById('page2').classList.remove('active');
+      document.getElementById('page3').classList.add('active');
+      startTimer();
+    }
+
+    function startTimer() {
+      updateTimer();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert('Time window expired. Submitting validation request.');
+          submitExam();
+        }
+      }, 1000);
+    }
+
+    function updateTimer() {
+      const mins = Math.floor(timeLeft / 60);
+      const secs = timeLeft % 60;
+      document.getElementById('timer').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function updateTask(taskNum) {
+      const checked = document.getElementById(`check${taskNum}`).checked;
+      const card = document.getElementById(`task${taskNum}`);
+      const status = document.getElementById(`status${taskNum}`);
+      const prog = document.getElementById(`prog${taskNum}`);
+
+      if (checked) {
+        card.classList.add('completed');
+        status.className = 'status-badge status-done';
+        status.textContent = 'Done';
+
+        prog.className = 'progress-status done';
+        prog.textContent = 'Done';
+        completedCount++;
+      } else {
+        card.classList.remove('completed');
+        status.className = 'status-badge status-pending';
+        status.textContent = 'Pending';
+
+        prog.className = 'progress-status pending';
+        prog.textContent = 'Pending';
+        completedCount--;
+      }
+
+      document.getElementById('submitBtn').disabled = (completedCount !== 6);
+    }
+
+    /* FIX: wrappers required because HTML uses onchange="updateTask1()" etc. [file:1] */
+    function updateTask1() { updateTask(1); }
+    function updateTask2() { updateTask(2); }
+    function updateTask3() { updateTask(3); }
+    function updateTask4() { updateTask(4); }
+    function updateTask5() { updateTask(5); }
+    function updateTask6() { updateTask(6); }
+
+    async function submitExam() {
+      clearInterval(timerInterval);
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = 'Validation in progress...';
+
+      try {
+        const response = await fetch('https://prokode-exam.onrender.com/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId })
+        });
+
+        const data = await response.json();
+        const resultCard = document.getElementById('resultCard');
+        resultCard.classList.remove('hidden');
+
+        if (data.overall_status === 'pass') {
+          resultCard.className = 'result-card';
+          resultCard.innerHTML = `
+            <h2>Validation Result Passed</h2>
+            <div class="score">${data.score}/${data.total}</div>
+            <p>All required checks returned a passing status.</p>
+            <p style="margin-top:12px;color:#4b5563;font-size:13px;">
+              Temporary account cleanup completed.<br />
+              Results will be sent to the provided email address.
+            </p>
+          `;
+        } else {
+          resultCard.className = 'result-card fail';
+          resultCard.innerHTML = `
+            <h2>Validation Result Not Passed</h2>
+            <div class="score" style="color:#111827;">${data.score}/${data.total}</div>
+            <p>One or more checks did not meet the required criteria.</p>
+            <p style="margin-top:12px;color:#4b5563;font-size:13px;">
+              Temporary account cleanup completed.<br />
+              Detailed results will be sent to the provided email address.
+            </p>
+          `;
         }
 
-        function startExam() {
-            document.getElementById('page2').classList.remove('active');
-            document.getElementById('page3').classList.add('active');
-            startTimer();
-        }
-
-        function startTimer() {
-            updateTimer();
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimer();
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    alert('Time window expired. Submitting validation request.');
-                    submitExam();
-                }
-            }, 1000);
-        }
-
-        function updateTimer() {
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            document.getElementById('timer').textContent = 
-                `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-
-        function updateTask(taskNum) {
-            const checked = document.getElementById(`check${taskNum}`).checked;
-            const card = document.getElementById(`task${taskNum}`);
-            const status = document.getElementById(`status${taskNum}`);
-            const prog = document.getElementById(`prog${taskNum}`);
-
-            if (checked) {
-                card.classList.add('completed');
-                status.className = 'status-badge status-done';
-                status.textContent = 'Done';
-                prog.className = 'progress-status done';
-                prog.textContent = '✓';
-                completedCount++;
-            } else {
-                card.classList.remove('completed');
-                status.className = 'status-badge status-pending';
-                status.textContent = 'Pending';
-                prog.className = 'progress-status pending';
-                prog.textContent = '○';
-                completedCount--;
-            }
-
-            document.getElementById('submitBtn').disabled = completedCount !== 6;
-        }
-
-        async function submitExam() {
-            clearInterval(timerInterval);
-            
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerHTML = 'Validation in progress...';
-
-            try {
-                const response = await fetch('https://prokode-exam.onrender.com/validate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
-                });
-
-                const data = await response.json();
-
-                const resultCard = document.getElementById('resultCard');
-                resultCard.classList.remove('hidden');
-
-                if (data.overall_status === 'pass') {
-                    resultCard.className = 'result-card';
-                    resultCard.innerHTML = `
-                        <h2>Validation Result: Passed</h2>
-                        <div class="score">${data.score}/${data.total}</div>
-                        <p>All required checks returned a passing status.</p>
-                        <p style="margin-top: 12px; color: #4b5563; font-size: 13px;">
-                            Temporary account cleanup completed.<br>
-                            Results will be sent to the provided email address.
-                        </p>
-                    `;
-                } else {
-                    resultCard.className = 'result-card fail';
-                    resultCard.innerHTML = `
-                        <h2>Validation Result: Not Passed</h2>
-                        <div class="score" style="color: #111827;">${data.score}/${data.total}</div>
-                        <p>One or more checks did not meet the required criteria.</p>
-                        <p style="margin-top: 12px; color: #4b5563; font-size: 13px;">
-                            Temporary account cleanup completed.<br>
-                            Detailed results will be sent to the provided email address.
-                        </p>
-                    `;
-                }
-
-                resultCard.scrollIntoView({ behavior: 'smooth' });
-            } catch (error) {
-                alert('Validation error. Contact the system administrator.');
-            }
-        }
-    </script>
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert('Validation error. Contact the system administrator.');
+      }
+    }
+  </script>
 </body>
 </html>
