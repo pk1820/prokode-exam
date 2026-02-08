@@ -1,12 +1,13 @@
+```python
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import random
 import string
 import os
+
 app = Flask(__name__)
 CORS(app)
-
 
 DOMAIN = os.getenv("OKTA_DOMAIN", "https://integrator-6652914.okta.com")
 TOKEN = os.getenv("OKTA_TOKEN")
@@ -33,8 +34,47 @@ def generate_password():
         ''.join(random.choices(string.ascii_letters + string.digits, k=8))
     )
 
-# API Endpoints
+def okta_get(url, params=None):
+    return requests.get(url, headers=HEADERS, params=params)
 
+def okta_post(url, json=None):
+    return requests.post(url, headers=HEADERS, json=json)
+
+def okta_put(url, json=None):
+    return requests.put(url, headers=HEADERS, json=json)
+
+def okta_delete(url):
+    return requests.delete(url, headers=HEADERS)
+
+def find_group_by_name(group_name):
+    """Return first matching group object by name (OKTA_GROUP), or None"""
+    try:
+        response = okta_get(f"{DOMAIN}/api/v1/groups", params={"q": group_name})
+        if response.status_code != 200:
+            return None
+        groups = response.json() or []
+        for g in groups:
+            profile = g.get("profile", {})
+            if profile.get("name") == group_name:
+                return g
+        return None
+    except:
+        return None
+
+def find_user_by_profile_email(email):
+    """Return first matching user object by profile.email, or None"""
+    try:
+        search_url = f"{DOMAIN}/api/v1/users"
+        params = {"search": f'profile.email eq "{email}"'}
+        response = okta_get(search_url, params=params)
+        if response.status_code != 200:
+            return None
+        users = response.json() or []
+        return users[0] if users else None
+    except:
+        return None
+
+# API Endpoints
 @app.route('/create-account', methods=['POST'])
 def create_account():
     """Create temporary exam account for candidate"""
@@ -103,7 +143,6 @@ def validate():
         data = request.json
         user_id = data.get('user_id')
         
-        # Validation logic (same as before)
         results = []
         
         # Task 1: Check user Ben Carter
@@ -145,8 +184,21 @@ def validate():
             "name": "Group Creation",
             "status": group_result.get("status", "fail")
         })
+
+        # Task 5: Check group rule for Summer Interns based on title contains "Intern"
+        rule_result = check_group_rule_title_contains_intern("Summer Interns")
+        results.append({
+            "name": "Group Rule",
+            "status": rule_result.get("status", "fail")
+        })
+
+        # Task 6: Check Alexandra Cooper is a member of Summer Interns
+        member_result = check_user_in_group_by_name("alexandra.cooper@oktacertified.com", "Summer Interns")
+        results.append({
+            "name": "Manual Group Assignment",
+            "status": member_result.get("status", "fail")
+        })
         
-        # Calculate score
         passed = sum(1 for r in results if r["status"] == "pass")
         total = len(results)
         overall_status = "pass" if passed == total else "fail"
@@ -169,20 +221,18 @@ def validate():
             "error": str(e),
             "overall_status": "fail",
             "score": 0,
-            "total": 4
+            "total": 6
         }), 500
 
 def delete_user(user_id):
     """Deactivate and delete user account"""
     try:
-        # Deactivate user first
         deactivate_response = requests.post(
             f"{DOMAIN}/api/v1/users/{user_id}/lifecycle/deactivate",
             headers=HEADERS
         )
         
         if deactivate_response.status_code == 200:
-            # Delete user
             delete_response = requests.delete(
                 f"{DOMAIN}/api/v1/users/{user_id}",
                 headers=HEADERS
@@ -199,11 +249,10 @@ def delete_user(user_id):
         return f"Cleanup error: {str(e)}"
 
 # Validation Functions (same as before)
-
 def check_user(email, expected_profile):
     """Check if user exists with correct profile"""
     try:
-        search_url = f"{DOMAIN}/api/v1/users?search=profile.email eq \"{email}\""
+        search_url = f"{DOMAIN}/api/v1/users?search=profile.email eq \\"{email}\\""
         response = requests.get(search_url, headers=HEADERS)
         
         if response.status_code != 200:
@@ -215,7 +264,6 @@ def check_user(email, expected_profile):
         
         profile = users[0].get("profile", {})
         
-        # Check all fields
         all_match = (
             profile.get("firstName") == expected_profile.get("firstName") and
             profile.get("lastName") == expected_profile.get("lastName") and
@@ -247,7 +295,7 @@ def check_custom_attribute(variable_name):
 def check_custom_attribute_value(email, attribute_name, expected_value):
     """Check if custom attribute has correct value"""
     try:
-        search_url = f"{DOMAIN}/api/v1/users?search=profile.email eq \"{email}\""
+        search_url = f"{DOMAIN}/api/v1/users?search=profile.email eq \\"{email}\\""
         response = requests.get(search_url, headers=HEADERS)
         
         if response.status_code != 200:
@@ -280,6 +328,82 @@ def check_group(group_name):
     except:
         return {"status": "fail"}
 
+def check_group_rule_title_contains_intern(target_group_name):
+    """
+    Check if any group rule assigns users to target_group_name with an EL condition
+    that references user.title and contains 'Intern'.
+    """
+    try:
+        group = find_group_by_name(target_group_name)
+        if not group:
+            return {"status": "fail"}
+
+        target_group_id = group.get("id")
+        if not target_group_id:
+            return {"status": "fail"}
+
+        # List all group rules
+        response = okta_get(f"{DOMAIN}/api/v1/groups/rules")
+        if response.status_code != 200:
+            return {"status": "fail"}
+
+        rules = response.json() or []
+        for rule in rules:
+            actions = rule.get("actions", {})
+            assign = actions.get("assignUserToGroups", {})
+            group_ids = assign.get("groupIds", []) or []
+
+            if target_group_id not in group_ids:
+                continue
+
+            expr_obj = rule.get("conditions", {}).get("expression", {})
+            expr_value = (expr_obj.get("value") or "").strip()
+
+            # Accept a few common EL variations; keep matching simple and deterministic
+            expr_lc = expr_value.lower()
+            has_title = "user.title" in expr_lc
+            has_intern = "intern" in expr_lc
+            has_contains = "contains" in expr_lc or ".contains(" in expr_lc
+
+            if has_title and has_intern and has_contains:
+                return {"status": "pass"}
+
+        return {"status": "fail"}
+    except:
+        return {"status": "fail"}
+
+def check_user_in_group_by_name(user_email, group_name):
+    """Check if the user (by profile.email) is a member of the specified group."""
+    try:
+        group = find_group_by_name(group_name)
+        if not group:
+            return {"status": "fail"}
+        group_id = group.get("id")
+        if not group_id:
+            return {"status": "fail"}
+
+        user = find_user_by_profile_email(user_email)
+        if not user:
+            return {"status": "fail"}
+        user_id = user.get("id")
+        if not user_id:
+            return {"status": "fail"}
+
+        # List group members and look for user id
+        # GET /api/v1/groups/{groupId}/users
+        response = okta_get(f"{DOMAIN}/api/v1/groups/{group_id}/users", params={"limit": 200})
+        if response.status_code != 200:
+            return {"status": "fail"}
+
+        members = response.json() or []
+        for m in members:
+            if m.get("id") == user_id:
+                return {"status": "pass"}
+
+        return {"status": "fail"}
+    except:
+        return {"status": "fail"}
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check"""
@@ -297,3 +421,4 @@ if __name__ == '__main__':
     print("   GET  /health          - Health check")
     print("=" * 50)
     app.run(debug=True, port=5000, host='0.0.0.0')
+```
